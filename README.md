@@ -46,3 +46,24 @@ and the factory runs only the ones a change reaches.
 ## License
 
 [MIT](LICENSE)
+
+## Contributing
+
+Contributions are welcome. Here is how to propose a change.
+
+1. Fork the repository.
+2. Create a branch named after what you are changing.
+3. Make your changes. Keep them focused — one change per pull request.
+4. Install dependencies and run the checks your change touches:
+
+   ```bash
+   bun install
+   (cd packages/contracts && bun test)
+   (cd services/ingest && go test ./...)
+   (cd services/budget && cargo test)
+   (cd apps/console && bun test)
+   ```
+
+5. Open a pull request from your branch. A maintainer will review it.
+
+If your change touches more than one area, run the checks in every area it reaches.
