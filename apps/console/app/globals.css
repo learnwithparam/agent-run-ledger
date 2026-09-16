@@ -88,8 +88,10 @@ td.id { font-family: var(--font-mono); color: var(--c-ink-muted); white-space: n
 .waterfall { display: grid; gap: var(--space-2); margin: 0 0 var(--space-8); }
 .bar { display: grid; grid-template-columns: 7rem 1fr 5rem 5rem; align-items: center; gap: var(--space-4); }
 .bar .name { font-family: var(--font-mono); font-size: var(--step--1); color: var(--c-ink-muted); }
-.bar .track { background: var(--c-bg-inset); border-radius: var(--radius-sm); height: 1.4rem; overflow: hidden; }
-.bar .fill { background: var(--c-ink); height: 100%; border-radius: var(--radius-sm); min-width: 2px; }
+.bar .track { display: block; background: var(--c-bg-inset); border-radius: var(--radius-sm); height: 1.4rem; overflow: hidden; }
+/* Blocks, not spans. An inline element ignores both width and height, so every
+   bar rendered the full width of its track and the waterfall said nothing. */
+.bar .fill { display: block; background: var(--c-ink); height: 100%; border-radius: var(--radius-sm); min-width: 2px; }
 .bar.slowest .fill { background: var(--c-accent); }
 .bar.slowest .name { color: var(--c-ink); font-weight: 600; }
 .bar .ms, .bar .calls { font-family: var(--font-mono); font-size: var(--step--1); font-variant-numeric: tabular-nums; text-align: right; }
