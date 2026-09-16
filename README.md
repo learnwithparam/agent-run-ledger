@@ -43,6 +43,31 @@ and the factory runs only the ones a change reaches.
 (cd apps/console && bun test)
 ```
 
+## Contributing
+
+Changes are welcome. Here is how to propose one.
+
+1. **Fork** the repository and create a branch with a descriptive name.
+2. **Set up** a development environment (`bun install`).
+3. **Make your change.** Only touch files the change calls for.
+4. **Check the affected area.** Each area has its own test and type-check commands:
+
+   ```bash
+   (cd packages/contracts && bun test && bun x tsc --noEmit)
+   (cd services/ingest   && go test ./... && go vet ./...)
+   (cd services/budget   && cargo test --quiet && cargo check --quiet)
+   (cd apps/console      && bun test && bun x tsc --noEmit)
+   ```
+
+5. **Open a pull request.** Tell the reviewer what the change does and why.
+
+Some paths are protected — the [charter](.factory/charter.md) lists them and the reason for each. A
+pull request that touches a protected path needs extra scrutiny and may need a plan approved before
+any code is written. The same charter explains what finished means and when the factory stops and
+asks for help.
+
+Every pull request is reviewed by a person. Nothing merges unattended.
+
 ## License
 
 [MIT](LICENSE)
