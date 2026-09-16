@@ -28,3 +28,10 @@ bunx @learnwithparam/software-factory init .
 That writes a starting `charter.md` you must edit, a `targets.json` guessed from your directory
 layout, and no skills. It refuses to guess autonomy levels, because the whole point of the charter
 is that a person decided them.
+
+## Issues
+
+`issues/*.md` are work items, standing in for an issue tracker so the lab runs offline. A real
+factory reads GitHub or Linear and never looks here. They are in `.factory` because they describe
+work on this repository, and they are the three shapes worth having: one an agent may finish alone,
+one that spans several languages and needs a person to accept the plan, and one it must refuse.
