@@ -40,6 +40,7 @@ each line is part of it, so a path cannot be added without saying why.
 services/budget/**        # the money path, and a wrong answer here is expensive and slow to notice
 .factory/targets.json     # editing the ownership graph would widen every other rule in this file
 .factory/charter.md       # limits an agent can edit are not limits
+AGENTS.md                 # it repeats those limits, so the same argument applies to it
 .github/**                # a workflow change can switch off the checks everything else rests on
 **/*.lock                 # a lockfile changes only in a task that exists to change it
 **/Cargo.lock             # the same, for the money path

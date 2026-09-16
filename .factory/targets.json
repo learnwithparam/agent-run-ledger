@@ -69,6 +69,7 @@
         ".gitignore",
         ".factory/**",
         "README.md",
+        "AGENTS.md",
         "LICENSE"
       ],
       "dependsOn": [],
