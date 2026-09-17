@@ -5,7 +5,7 @@
   "description": "One agent run, from the moment an item is claimed to the moment it stops. Go, Rust and TypeScript each assert their own type against this file, so a change here goes red in three suites until all three are updated.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "item", "outcome", "startedAt", "endedAt", "tokensIn", "tokensOut", "costMinor", "currency"],
+  "required": ["id", "item", "outcome", "startedAt", "endedAt", "tokensIn", "tokensOut", "costMinor", "currency", "toolCalls"],
   "properties": {
     "id": { "type": "string", "description": "Stable run identifier" },
     "item": { "type": "string", "description": "The work item this run was claimed for" },
@@ -15,6 +15,7 @@
     "tokensIn": { "type": "integer", "description": "Tokens sent to the model across the run" },
     "tokensOut": { "type": "integer", "description": "Tokens returned by the model across the run" },
     "costMinor": { "type": "integer", "description": "Cost in minor units, never a float" },
-    "currency": { "type": "string", "enum": ["EUR", "USD"], "description": "ISO 4217 code" }
+    "currency": { "type": "string", "enum": ["EUR", "USD"], "description": "ISO 4217 code" },
+    "toolCalls": { "type": "integer", "description": "Total tool calls made across all stages in the run" }
   }
 }

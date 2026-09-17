@@ -73,6 +73,14 @@ func TestANegativeCostIsRefused(t *testing.T) {
 	}
 }
 
+func TestANegativeToolCallsCountIsRefused(t *testing.T) {
+	r := aRun()
+	r.ToolCalls = -1
+	if err := NewStore().PutRun(r); !errors.Is(err, ErrNegativeCount) {
+		t.Fatalf("want ErrNegativeCount, got %v", err)
+	}
+}
+
 func TestAStageForAnUnknownRunIsRefused(t *testing.T) {
 	st := Stage{RunID: "nope", Name: "claim", StartedAt: "2026-09-16T10:00:00Z", EndedAt: "2026-09-16T10:00:01Z"}
 	if err := NewStore().AddStage(st); !errors.Is(err, ErrUnknownRun) {
