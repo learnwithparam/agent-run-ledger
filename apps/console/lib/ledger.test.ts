@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import type { Stage } from '@ledger/contracts'
-import { humanMs, slowestStage, waterfall } from './ledger.ts'
+import type { Run, Stage } from '@ledger/contracts'
+import { costPer1kTokens, humanMs, slowestStage, waterfall } from './ledger.ts'
 
 function stage(name: Stage['name'], from: string, to: string, toolCalls = 0): Stage {
 	return { runId: 'r', name, startedAt: from, endedAt: to, toolCalls }
@@ -58,5 +58,27 @@ describe('humanMs', () => {
 
 	it('pads the seconds so a column of times lines up', () => {
 		expect(humanMs(305_000)).toBe('5m 05s')
+	})
+})
+
+describe('costPer1kTokens', () => {
+	const sample: Run = {
+		id: 'x',
+		item: 'test',
+		outcome: 'passed',
+		startedAt: '2026-09-17T10:00:00Z',
+		endedAt: '2026-09-17T10:01:00Z',
+		tokensIn: 900,
+		tokensOut: 100,
+		costMinor: 20,
+		currency: 'USD',
+	}
+
+	it('computes cost per thousand mixed tokens', () => {
+		expect(costPer1kTokens(sample)).toBe('$0.20/1K')
+	})
+
+	it('shows a dash when there are no tokens', () => {
+		expect(costPer1kTokens({ ...sample, tokensIn: 0, tokensOut: 0 })).toBe('—')
 	})
 })

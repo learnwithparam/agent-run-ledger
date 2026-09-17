@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { durationMs, formatMinor } from '@ledger/contracts'
 import { assess, periodOf, spendFor } from '@/lib/budget.ts'
-import { humanMs, listRuns } from '@/lib/ledger.ts'
+import { costPer1kTokens, humanMs, listRuns } from '@/lib/ledger.ts'
 import { NoRuns, Unreachable } from '@/components/empty.tsx'
 import { BudgetChip, OutcomeChip } from '@/components/state.tsx'
 
@@ -95,6 +95,7 @@ export default async function Page() {
 								<th className="num">Took</th>
 								<th className="num">Tokens</th>
 								<th className="num">Cost</th>
+								<th className="num">Cost / 1K</th>
 								<th>Run</th>
 							</tr>
 						</thead>
@@ -110,6 +111,7 @@ export default async function Page() {
 									<td className="num">{humanMs(durationMs(run.startedAt, run.endedAt))}</td>
 									<td className="num">{(run.tokensIn + run.tokensOut).toLocaleString('en')}</td>
 									<td className="num">{formatMinor(run.costMinor, run.currency)}</td>
+									<td className="num">{costPer1kTokens(run)}</td>
 									<td className="id">{run.id}</td>
 								</tr>
 							))}

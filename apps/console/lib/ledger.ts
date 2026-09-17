@@ -8,7 +8,7 @@
  */
 
 import type { Budget, Run, Stage, StageName } from '@ledger/contracts'
-import { STAGE_ORDER, durationMs } from '@ledger/contracts'
+import { STAGE_ORDER, durationMs, formatMinor } from '@ledger/contracts'
 
 export interface RunDetail {
 	run: Run
@@ -82,6 +82,17 @@ export function humanMs(ms: number): string {
 	const seconds = Math.round(ms / 1000)
 	if (seconds < 60) return `${seconds}s`
 	return `${Math.floor(seconds / 60)}m ${String(seconds % 60).padStart(2, '0')}s`
+}
+
+/**
+ * Cost per thousand tokens, formatted for display. Returns a dash when there
+ * are no tokens, because dividing by zero makes things worse.
+ */
+export function costPer1kTokens(run: Run): string {
+	const total = run.tokensIn + run.tokensOut
+	if (total === 0) return '—'
+	const per1k = Math.round((run.costMinor * 1000) / total)
+	return `${formatMinor(per1k, run.currency)}/1K`
 }
 
 export type { Budget, Run, Stage, StageName }
