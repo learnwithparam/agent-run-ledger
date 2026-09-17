@@ -49,6 +49,30 @@ func TestAnAbsurdLimitIsRefused(t *testing.T) {
 	}
 }
 
+func TestZeroLimitReturnsEmptyList(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?limit=0", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", rec.Code)
+	}
+	var runs []Run
+	if err := json.Unmarshal(rec.Body.Bytes(), &runs); err != nil {
+		t.Fatalf("body is not a run list: %v", err)
+	}
+	if len(runs) != 0 {
+		t.Fatalf("want 0 runs, got %d", len(runs))
+	}
+}
+
+func TestNegativeLimitIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?limit=-1", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_limit" {
+		t.Fatalf("want a machine-readable code, got %s", rec.Body.String())
+	}
+}
+
 func TestOneRunCarriesItsStages(t *testing.T) {
 	rec := call(t, Seed(), http.MethodGet, "/runs/run-101", "")
 	var body struct {
