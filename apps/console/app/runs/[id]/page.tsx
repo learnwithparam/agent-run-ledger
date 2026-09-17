@@ -46,7 +46,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
 					<p className="lede">
 						<OutcomeChip outcome={run.outcome} /> {humanMs(wall)} from claim to stop,{' '}
 						{formatMinor(run.costMinor, run.currency)}, {(run.tokensIn + run.tokensOut).toLocaleString('en')}{' '}
-						tokens.
+						tokens, {run.toolCalls.toLocaleString('en')} calls.
 					</p>
 				</div>
 			</header>

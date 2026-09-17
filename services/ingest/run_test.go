@@ -9,7 +9,7 @@ func aRun() Run {
 	return Run{
 		ID: "run-1", Item: "item-1", Outcome: "passed",
 		StartedAt: "2026-09-16T10:00:00Z", EndedAt: "2026-09-16T10:05:00Z",
-		TokensIn: 100, TokensOut: 20, CostMinor: 3, Currency: "EUR",
+		TokensIn: 100, TokensOut: 20, CostMinor: 3, Currency: "EUR", ToolCalls: 0,
 	}
 }
 

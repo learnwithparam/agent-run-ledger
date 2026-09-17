@@ -23,6 +23,7 @@ type Run struct {
 	TokensOut int    `json:"tokensOut"`
 	CostMinor int    `json:"costMinor"`
 	Currency  string `json:"currency"`
+	ToolCalls int    `json:"toolCalls"`
 }
 
 // Stage mirrors packages/contracts/schema/stage.schema.json.
@@ -85,7 +86,7 @@ func (s *Store) PutRun(r Run) error {
 	if err := window(r.StartedAt, r.EndedAt); err != nil {
 		return err
 	}
-	if r.TokensIn < 0 || r.TokensOut < 0 || r.CostMinor < 0 {
+	if r.TokensIn < 0 || r.TokensOut < 0 || r.CostMinor < 0 || r.ToolCalls < 0 {
 		return ErrNegativeCount
 	}
 	if _, seen := s.runs[r.ID]; !seen {

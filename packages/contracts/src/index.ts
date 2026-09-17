@@ -22,6 +22,7 @@ export interface Run {
 	tokensOut: number
 	costMinor: number
 	currency: Currency
+	toolCalls: number
 }
 
 export interface Stage {
@@ -42,7 +43,7 @@ export interface Budget {
 }
 
 export const RUN_FIELDS = [
-	'id', 'item', 'outcome', 'startedAt', 'endedAt', 'tokensIn', 'tokensOut', 'costMinor', 'currency',
+	'id', 'item', 'outcome', 'startedAt', 'endedAt', 'tokensIn', 'tokensOut', 'costMinor', 'currency', 'toolCalls',
 ] as const
 
 export const STAGE_FIELDS = ['runId', 'name', 'startedAt', 'endedAt', 'toolCalls'] as const

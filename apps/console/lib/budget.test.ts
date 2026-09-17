@@ -13,6 +13,7 @@ function run(costMinor: number, startedAt: string, currency: Run['currency'] = '
 		tokensOut: 0,
 		costMinor,
 		currency,
+		toolCalls: 0,
 	}
 }
 
