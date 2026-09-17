@@ -43,6 +43,39 @@ and the factory runs only the ones a change reaches.
 (cd apps/console && bun test)
 ```
 
+## Contributing
+
+This repository is a [software factory](https://github.com/learnwithparam/software-factory) target.
+Changes are welcome, and every pull request is reviewed by a person before it merges.
+
+### Setup
+
+```bash
+bun install
+```
+
+### Proposing a change
+
+1. Fork the repository and create a feature branch.
+2. Make your change. Keep each commit focused — one logical change per commit.
+3. Run the checks for every area your change reaches:
+
+   ```bash
+   (cd packages/contracts && bun test)
+   (cd services/ingest && go test ./...)
+   (cd services/budget && cargo test)
+   (cd apps/console && bun test)
+   ```
+
+4. Open a pull request with a clear description of what changed and why.
+5. Address any feedback from the review. Nothing merges without a named engineer approving it.
+
+### Factory rules
+
+This repository uses `.factory/charter.md` and `.factory/targets.json` to define what an automated
+agent may do in each part of the codebase without asking. Contributors should read those files to
+understand which paths need a person's involvement.
+
 ## License
 
 [MIT](LICENSE)
