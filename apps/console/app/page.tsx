@@ -95,6 +95,7 @@ export default async function Page() {
 								<th className="num">Took</th>
 								<th className="num">Tokens</th>
 								<th className="num">Cost</th>
+								<th className="num">Cost / 1k tok</th>
 								<th>Run</th>
 							</tr>
 						</thead>
@@ -110,6 +111,11 @@ export default async function Page() {
 									<td className="num">{humanMs(durationMs(run.startedAt, run.endedAt))}</td>
 									<td className="num">{(run.tokensIn + run.tokensOut).toLocaleString('en')}</td>
 									<td className="num">{formatMinor(run.costMinor, run.currency)}</td>
+									<td className="num">
+										{run.tokensIn + run.tokensOut === 0
+											? '—'
+											: formatMinor((run.costMinor / (run.tokensIn + run.tokensOut)) * 1000, run.currency)}
+									</td>
 									<td className="id">{run.id}</td>
 								</tr>
 							))}
