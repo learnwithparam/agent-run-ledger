@@ -6,11 +6,11 @@ package ingest
 func Seed() *Store {
 	s := NewStore()
 	runs := []Run{
-		{ID: "run-101", Item: "console-empty-state", Outcome: "passed", StartedAt: "2026-09-15T09:02:00Z", EndedAt: "2026-09-15T09:09:30Z", TokensIn: 41200, TokensOut: 5100, ToolCalls: 34, CostMinor: 74, Currency: "EUR"},
-		{ID: "run-102", Item: "stage-waterfall-overflow", Outcome: "failed", StartedAt: "2026-09-15T10:14:00Z", EndedAt: "2026-09-15T10:37:10Z", TokensIn: 96800, TokensOut: 11400, ToolCalls: 57, CostMinor: 181, Currency: "EUR"},
-		{ID: "run-103", Item: "tier-discount-rounding", Outcome: "refused", StartedAt: "2026-09-15T11:01:00Z", EndedAt: "2026-09-15T11:01:40Z", TokensIn: 3100, TokensOut: 260, ToolCalls: 3, CostMinor: 5, Currency: "EUR"},
-		{ID: "run-104", Item: "run-list-keyset-paging", Outcome: "escalated", StartedAt: "2026-09-15T13:22:00Z", EndedAt: "2026-09-15T14:05:00Z", TokensIn: 154300, TokensOut: 19600, ToolCalls: 99, CostMinor: 296, Currency: "EUR"},
-		{ID: "run-105", Item: "contract-add-tool-calls", Outcome: "passed", StartedAt: "2026-09-16T08:41:00Z", EndedAt: "2026-09-16T08:58:20Z", TokensIn: 88400, TokensOut: 12900, ToolCalls: 60, CostMinor: 168, Currency: "EUR"},
+		{ID: "run-101", Item: "console-empty-state", Outcome: "passed", StartedAt: "2026-09-15T09:02:00Z", EndedAt: "2026-09-15T09:09:30Z", TokensIn: 41200, TokensOut: 5100, CostMinor: 74, Currency: "EUR"},
+		{ID: "run-102", Item: "stage-waterfall-overflow", Outcome: "failed", StartedAt: "2026-09-15T10:14:00Z", EndedAt: "2026-09-15T10:37:10Z", TokensIn: 96800, TokensOut: 11400, CostMinor: 181, Currency: "EUR"},
+		{ID: "run-103", Item: "tier-discount-rounding", Outcome: "refused", StartedAt: "2026-09-15T11:01:00Z", EndedAt: "2026-09-15T11:01:40Z", TokensIn: 3100, TokensOut: 260, CostMinor: 5, Currency: "EUR"},
+		{ID: "run-104", Item: "run-list-keyset-paging", Outcome: "escalated", StartedAt: "2026-09-15T13:22:00Z", EndedAt: "2026-09-15T14:05:00Z", TokensIn: 154300, TokensOut: 19600, CostMinor: 296, Currency: "EUR"},
+		{ID: "run-105", Item: "contract-add-tool-calls", Outcome: "passed", StartedAt: "2026-09-16T08:41:00Z", EndedAt: "2026-09-16T08:58:20Z", TokensIn: 88400, TokensOut: 12900, CostMinor: 168, Currency: "EUR"},
 	}
 	for _, r := range runs {
 		_ = s.PutRun(r)

@@ -111,6 +111,17 @@ func (s *Store) AddStage(st Stage) error {
 		return ErrNegativeCount
 	}
 	s.stages[st.RunID] = append(s.stages[st.RunID], st)
+
+	// Recompute the run-level total so the ledger is always consistent with its
+	// stages. The schema demands toolCalls on both Run and Stage; the service that
+	// owns runs is the one that keeps them in step.
+	total := 0
+	for _, stage := range s.stages[st.RunID] {
+		total += stage.ToolCalls
+	}
+	r := s.runs[st.RunID]
+	r.ToolCalls = total
+	s.runs[st.RunID] = r
 	return nil
 }
 
