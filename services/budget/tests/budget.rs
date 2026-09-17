@@ -2,7 +2,7 @@ use budget::{assess, format_minor, state_for, total_minor, Budget, BudgetError, 
 
 #[test]
 fn spent_plus_remaining_always_equals_the_limit() {
-    for spent in [0, 1, 4_999, 5_000, 39_999, 40_000, 49_999, 50_000, 73_000] {
+    for spent in [0, 1, 4_999, 5_000, 24_999, 25_000, 39_999, 40_000, 49_999, 50_000, 73_000] {
         let b: Budget = assess("2026-09", 50_000, spent, Currency::Eur).unwrap();
         assert_eq!(
             b.spent_minor + b.remaining_minor,
@@ -13,9 +13,9 @@ fn spent_plus_remaining_always_equals_the_limit() {
 }
 
 #[test]
-fn the_warning_starts_exactly_at_eighty_percent() {
-    assert_eq!(state_for(39_999, 50_000), State::Under);
-    assert_eq!(state_for(40_000, 50_000), State::Warning);
+fn the_warning_starts_exactly_at_fifty_percent() {
+    assert_eq!(state_for(24_999, 50_000), State::Under);
+    assert_eq!(state_for(25_000, 50_000), State::Warning);
     assert_eq!(state_for(49_999, 50_000), State::Warning);
 }
 
@@ -27,9 +27,9 @@ fn reaching_the_limit_is_a_breach_not_a_warning() {
 
 #[test]
 fn the_threshold_holds_on_a_limit_that_does_not_divide_evenly() {
-    // 80% of 333 is 266.4. Spending 266 is still under, 267 is a warning.
-    assert_eq!(state_for(266, 333), State::Under);
-    assert_eq!(state_for(267, 333), State::Warning);
+    // 50% of 333 is 166.5. Spending 166 is still under, 167 is a warning.
+    assert_eq!(state_for(166, 333), State::Under);
+    assert_eq!(state_for(167, 333), State::Warning);
 }
 
 #[test]
