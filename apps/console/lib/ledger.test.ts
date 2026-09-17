@@ -23,7 +23,7 @@ describe('waterfall', () => {
 			stage('gates', '2026-09-16T10:05:00Z', '2026-09-16T10:06:00Z'),
 		])
 		const total = bars.reduce((sum, bar) => sum + bar.share, 0)
-		expect(total).toBeGreaterThanOrEqual(0)
+		expect(total).toBeCloseTo(1, 10)
 	})
 
 	it('reports zero shares rather than dividing by zero', () => {
