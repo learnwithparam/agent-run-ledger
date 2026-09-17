@@ -73,6 +73,36 @@ func TestANegativeCostIsRefused(t *testing.T) {
 	}
 }
 
+func TestANegativeToolCallsCountIsRefused(t *testing.T) {
+	r := aRun()
+	r.ToolCalls = -1
+	if err := NewStore().PutRun(r); !errors.Is(err, ErrNegativeCount) {
+		t.Fatalf("want ErrNegativeCount, got %v", err)
+	}
+}
+
+func TestToolCallsAreComputedFromStages(t *testing.T) {
+	s := NewStore()
+	r := aRun()
+	if err := s.PutRun(r); err != nil {
+		t.Fatal(err)
+	}
+	stages := []Stage{
+		{RunID: "run-1", Name: "claim", StartedAt: "2026-09-16T10:00:00Z", EndedAt: "2026-09-16T10:00:01Z", ToolCalls: 1},
+		{RunID: "run-1", Name: "context", StartedAt: "2026-09-16T10:00:01Z", EndedAt: "2026-09-16T10:00:10Z", ToolCalls: 4},
+		{RunID: "run-1", Name: "implement", StartedAt: "2026-09-16T10:00:10Z", EndedAt: "2026-09-16T10:00:30Z", ToolCalls: 7},
+	}
+	for _, st := range stages {
+		if err := s.AddStage(st); err != nil {
+			t.Fatal(err)
+		}
+	}
+	r, _ = s.Run("run-1")
+	if r.ToolCalls != 12 {
+		t.Fatalf("want 12 tool calls, got %d", r.ToolCalls)
+	}
+}
+
 func TestAStageForAnUnknownRunIsRefused(t *testing.T) {
 	st := Stage{RunID: "nope", Name: "claim", StartedAt: "2026-09-16T10:00:00Z", EndedAt: "2026-09-16T10:00:01Z"}
 	if err := NewStore().AddStage(st); !errors.Is(err, ErrUnknownRun) {

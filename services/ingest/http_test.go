@@ -72,7 +72,7 @@ func TestAnUnknownRunIsNotFound(t *testing.T) {
 
 func TestAnUnknownFieldIsRejectedRatherThanIgnored(t *testing.T) {
 	// Silently dropping a field is how a contract change ships without anyone noticing.
-	body := `{"id":"r","item":"i","outcome":"passed","startedAt":"2026-09-16T10:00:00Z","endedAt":"2026-09-16T10:01:00Z","tokensIn":1,"tokensOut":1,"costMinor":1,"currency":"EUR","surprise":true}`
+	body := `{"id":"r","item":"i","outcome":"passed","startedAt":"2026-09-16T10:00:00Z","endedAt":"2026-09-16T10:01:00Z","tokensIn":1,"tokensOut":1,"toolCalls":0,"costMinor":1,"currency":"EUR","surprise":true}`
 	rec := call(t, NewStore(), http.MethodPost, "/runs", body)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d: %s", rec.Code, rec.Body.String())
