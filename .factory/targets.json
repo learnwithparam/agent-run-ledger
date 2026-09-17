@@ -1,12 +1,12 @@
 {
-  "$comment": "The solo shape. Same repository, same factory; only the autonomy column moves. Who owns which paths, what checks them, and how much freedom an agent has there. A path no target claims fails the build rather than being guessed at.",
+  "$comment": "Who owns which paths in this repository, what checks them, and how much freedom an agent has there. The factory supplies the matching; this file supplies the facts. A path no target claims fails the build rather than being guessed at.",
   "targets": {
     "contracts": {
       "paths": [
         "packages/contracts/**"
       ],
       "dependsOn": [],
-      "autonomy": "build",
+      "autonomy": "propose",
       "why": "One definition three services are built against. A change here is never local, so it is proposed and never landed unattended.",
       "cwd": "packages/contracts",
       "commands": {
@@ -37,8 +37,8 @@
       "dependsOn": [
         "contracts"
       ],
-      "autonomy": "build",
-      "why": "One person holds every consequence already. The gate is at merge, where they read the diff, rather than at authoring.",
+      "autonomy": "refuse",
+      "why": "The money path. It decides what a period is allowed to cost and when spend has breached. A plausible wrong answer here is expensive and slow to notice, so no agent lands a change without a person.",
       "cwd": "services/budget",
       "commands": {
         "test": "cargo test --quiet",
