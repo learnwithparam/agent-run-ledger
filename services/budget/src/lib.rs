@@ -116,7 +116,7 @@ pub fn assess(
         period: period.to_string(),
         limit_minor,
         spent_minor,
-        remaining_minor: (limit_minor - spent_minor).max(0),
+        remaining_minor: limit_minor - spent_minor,
         currency,
         state: state_for(spent_minor, limit_minor),
     })
