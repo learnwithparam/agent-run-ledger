@@ -43,6 +43,24 @@ and the factory runs only the ones a change reaches.
 (cd apps/console && bun test)
 ```
 
+## Contributing
+
+Changes are proposed through pull requests. The project uses the
+[software factory](https://github.com/learnwithparam/software-factory) workflow:
+
+1. Fork this repository.
+2. Create a branch for your change.
+3. Make your changes. Run the relevant checks from the [Checks](#checks) section above.
+4. Open a pull request for review.
+
+Some paths in this repository are governed by rules in
+[`.factory/targets.json`](.factory/targets.json) that restrict what an agent may change unattended.
+Review those rules before starting work — they exist because a wrong change to certain areas is
+expensive to notice.
+
+This project is documented, not automated. Every pull request needs a named engineer to approve it
+before it merges.
+
 ## License
 
 [MIT](LICENSE)
