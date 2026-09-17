@@ -123,6 +123,30 @@ func (s *Store) Runs() []Run {
 	return out
 }
 
+// RunsInRange lists runs whose startedAt is after (exclusive) the after bound and
+// before or at (inclusive) the before bound, newest first. Passing a zero value
+// for a bound leaves it open.
+//
+// A run whose stored start instant no longer parses is silently skipped.
+func (s *Store) RunsInRange(after, before time.Time) []Run {
+	var out []Run
+	for _, id := range s.order {
+		start, err := time.Parse(time.RFC3339, s.runs[id].StartedAt)
+		if err != nil {
+			continue
+		}
+		if !after.IsZero() && !start.After(after) {
+			continue
+		}
+		if !before.IsZero() && start.After(before) {
+			continue
+		}
+		out = append(out, s.runs[id])
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].StartedAt > out[j].StartedAt })
+	return out
+}
+
 func (s *Store) Run(id string) (Run, bool) {
 	r, ok := s.runs[id]
 	return r, ok

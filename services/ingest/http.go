@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // Handler serves the ledger. Every error carries a machine-readable code beside
@@ -17,7 +18,35 @@ func Handler(s *Store) http.Handler {
 	})
 
 	mux.HandleFunc("GET /runs", func(w http.ResponseWriter, r *http.Request) {
-		runs := s.Runs()
+		// Optional date range filter. When both are provided the before must
+		// not be before the after, which is what window() already checks.
+		var after, before time.Time
+		rawAfter := r.URL.Query().Get("startedAfter")
+		rawBefore := r.URL.Query().Get("startedBefore")
+		if rawAfter != "" || rawBefore != "" {
+			if rawAfter != "" {
+				var err error
+				after, err = time.Parse(time.RFC3339, rawAfter)
+				if err != nil {
+					writeError(w, http.StatusBadRequest, "bad_instant", "startedAfter is not an RFC 3339 instant.")
+					return
+				}
+			}
+			if rawBefore != "" {
+				var err error
+				before, err = time.Parse(time.RFC3339, rawBefore)
+				if err != nil {
+					writeError(w, http.StatusBadRequest, "bad_instant", "startedBefore is not an RFC 3339 instant.")
+					return
+				}
+			}
+			if rawAfter != "" && rawBefore != "" {
+				if err := window(rawAfter, rawBefore); err != nil {
+					writeError(w, http.StatusBadRequest, "ends_before_start", "startedBefore is before startedAfter.")
+					return
+				}
+			}
+		}
 		// Bounded by default. A list that grows without a limit is a list that
 		// eventually takes the page down, and the default is where that is decided.
 		limit := 50
@@ -28,6 +57,12 @@ func Handler(s *Store) http.Handler {
 				return
 			}
 			limit = parsed
+		}
+		var runs []Run
+		if rawAfter != "" || rawBefore != "" {
+			runs = s.RunsInRange(after, before)
+		} else {
+			runs = s.Runs()
 		}
 		if len(runs) > limit {
 			runs = runs[:limit]

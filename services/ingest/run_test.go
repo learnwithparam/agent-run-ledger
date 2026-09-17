@@ -3,6 +3,7 @@ package ingest
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func aRun() Run {
@@ -108,4 +109,65 @@ func TestTheSeedCarriesARefusal(t *testing.T) {
 		}
 	}
 	t.Fatal("no refused run in the seed")
+}
+
+func TestRunsInRangeReturnsOnlyMatchingRuns(t *testing.T) {
+	s := Seed()
+	// run-104 starts at 13:22, the only run between 13:00 and 14:10 on Sep 15
+	after, _ := time.Parse(time.RFC3339, "2026-09-15T13:00:00Z")
+	before, _ := time.Parse(time.RFC3339, "2026-09-15T14:10:00Z")
+	runs := s.RunsInRange(after, before)
+	if len(runs) != 1 {
+		t.Fatalf("want 1 run (run-104 at 13:22), got %d", len(runs))
+	}
+	if runs[0].ID != "run-104" {
+		t.Fatalf("want run-104, got %s", runs[0].ID)
+	}
+}
+
+func TestRunsInRangeWithNoAfterBoundIsUnboundedOnStart(t *testing.T) {
+	s := Seed()
+	before, _ := time.Parse(time.RFC3339, "2026-09-15T10:00:00Z")
+	runs := s.RunsInRange(time.Time{}, before)
+	if len(runs) < 1 {
+		t.Fatal("expected at least one run before 10:00")
+	}
+	for _, r := range runs {
+		start, _ := time.Parse(time.RFC3339, r.StartedAt)
+		if start.After(before) {
+			t.Fatalf("run %s started at %s, which is after the before bound", r.ID, r.StartedAt)
+		}
+	}
+}
+
+func TestRunsInRangeWithNoBeforeBoundIsUnboundedOnEnd(t *testing.T) {
+	s := Seed()
+	after, _ := time.Parse(time.RFC3339, "2026-09-16T00:00:00Z")
+	runs := s.RunsInRange(after, time.Time{})
+	if len(runs) != 1 {
+		t.Fatalf("want 1 run after midnight Sep 16, got %d", len(runs))
+	}
+	if runs[0].ID != "run-105" {
+		t.Fatalf("want run-105, got %s", runs[0].ID)
+	}
+}
+
+func TestRunsInRangeWithBothBoundsOpenReturnsAll(t *testing.T) {
+	s := Seed()
+	runs := s.RunsInRange(time.Time{}, time.Time{})
+	if len(runs) != 5 {
+		t.Fatalf("want 5 runs, got %d", len(runs))
+	}
+}
+
+func TestRunsInRangeReturnsNewestFirst(t *testing.T) {
+	s := Seed()
+	after, _ := time.Parse(time.RFC3339, "2026-09-15T00:00:00Z")
+	before, _ := time.Parse(time.RFC3339, "2026-09-17T00:00:00Z")
+	runs := s.RunsInRange(after, before)
+	for i := 1; i < len(runs); i++ {
+		if runs[i-1].StartedAt < runs[i].StartedAt {
+			t.Fatalf("out of order at %d: %s before %s", i, runs[i-1].StartedAt, runs[i].StartedAt)
+		}
+	}
 }

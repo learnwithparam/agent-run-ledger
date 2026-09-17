@@ -41,8 +41,12 @@ async function get<T>(path: string, timeoutMs = 4000): Promise<T> {
 	}
 }
 
-export function listRuns(limit = 50): Promise<Run[]> {
-	return get<Run[]>(`/runs?limit=${limit}`)
+export function listRuns(limit = 50, startedAfter?: string, startedBefore?: string): Promise<Run[]> {
+	const params = new URLSearchParams()
+	params.set('limit', String(limit))
+	if (startedAfter) params.set('startedAfter', startedAfter)
+	if (startedBefore) params.set('startedBefore', startedBefore)
+	return get<Run[]>(`/runs?${params.toString()}`)
 }
 
 export function readRun(id: string): Promise<RunDetail> {

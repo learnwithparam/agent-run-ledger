@@ -96,6 +96,40 @@ func TestHealthz(t *testing.T) {
 	}
 }
 
+func TestListRunsWithDateRange(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?startedAfter=2026-09-15T12:00:00Z&startedBefore=2026-09-15T14:00:00Z", "")
+	var runs []Run
+	if err := json.Unmarshal(rec.Body.Bytes(), &runs); err != nil {
+		t.Fatalf("body is not a run list: %v", err)
+	}
+	if len(runs) != 1 {
+		t.Fatalf("want 1 run (run-103 at 11:01 excluded, run-104 at 13:22 included, run-105 next day excluded), got %d", len(runs))
+	}
+	if runs[0].ID != "run-104" {
+		t.Fatalf("want run-104, got %s", runs[0].ID)
+	}
+}
+
+func TestListRunsWithBadInstantIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?startedAfter=not-a-time", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_instant" {
+		t.Fatalf("want bad_instant, got %s", rec.Body.String())
+	}
+}
+
+func TestListRunsWithBackwardsRangeIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?startedAfter=2026-09-16T00:00:00Z&startedBefore=2026-09-15T00:00:00Z", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "ends_before_start" {
+		t.Fatalf("want ends_before_start, got %s", rec.Body.String())
+	}
+}
+
 func code(t *testing.T, body []byte) string {
 	t.Helper()
 	var out map[string]string

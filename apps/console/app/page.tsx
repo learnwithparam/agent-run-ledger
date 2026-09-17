@@ -12,10 +12,16 @@ export const dynamic = 'force-dynamic'
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams?: { startedAfter?: string; startedBefore?: string }
+}) {
+	const after = searchParams?.startedAfter
+	const before = searchParams?.startedBefore
 	let runs
 	try {
-		runs = await listRuns()
+		runs = await listRuns(after || before ? 200 : 50, after, before)
 	} catch (error) {
 		return (
 			<Shell>
@@ -79,6 +85,30 @@ export default async function Page() {
 					</dl>
 				</div>
 			</section>
+
+			<form className="strip" method="GET" action="/">
+				<div className="wrap" style={{ display: 'flex', gap: '0.75rem', alignItems: 'end', flexWrap: 'wrap' }}>
+					<label style={{ display: 'flex', flexDirection: 'column', fontSize: '0.75rem' }}>
+						From
+						<input type="text" name="startedAfter" placeholder="2026-09-01T00:00:00Z"
+							defaultValue={after ?? ''}
+							style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} />
+					</label>
+					<label style={{ display: 'flex', flexDirection: 'column', fontSize: '0.75rem' }}>
+						To
+						<input type="text" name="startedBefore" placeholder="2026-09-30T23:59:59Z"
+							defaultValue={before ?? ''}
+							style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} />
+					</label>
+					<button type="submit"
+						style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+						Filter
+					</button>
+					{(after || before) && (
+						<a href="/" style={{ fontSize: '0.875rem' }}>Clear</a>
+					)}
+				</div>
+			</form>
 
 			<main>
 				<div className="wrap">
