@@ -43,6 +43,13 @@ one to the code that decides what something costs.
 Run the checks for every area your change reaches, not only the one you started in. The commands
 live in `.factory/targets.json` under each target, and the README lists them too.
 
+## The shared schema is pinned
+
+`packages/contracts/schema/run.schema.json` carries a checksum beside it. Change the schema and the
+contracts suite fails with the command that rewrites it. That is deliberate: three services are
+built against that file, so a change to it is never local, and the failure is how you find that out
+before you find it out one language at a time.
+
 ## Never weaken a check to make it pass
 
 Changing an assertion so a suite goes green is not a fix. If an existing test fails, either the

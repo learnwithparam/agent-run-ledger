@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { digest, recorded } from '../scripts/checksum.ts'
 import { join } from 'node:path'
 import { describe, expect, it } from 'bun:test'
 import {
@@ -67,5 +68,15 @@ describe('money', () => {
 
 	it('puts the sign before the symbol', () => {
 		expect(formatMinor(-250, 'EUR')).toBe('-€2.50')
+	})
+})
+
+describe('the shared schema is pinned', () => {
+	// Three services are built against this file, so a change to it is never
+	// local. The checksum is not a substitute for the type tests; it is the thing
+	// that tells whoever changed the schema that they have started something
+	// which crosses a boundary, before they find out one language at a time.
+	it('carries the checksum of the schema it describes', () => {
+		expect(recorded(), 'the schema changed: run `bun run checksum` in packages/contracts and commit the result').toBe(digest())
 	})
 })
