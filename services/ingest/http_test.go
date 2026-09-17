@@ -49,6 +49,67 @@ func TestAnAbsurdLimitIsRefused(t *testing.T) {
 	}
 }
 
+func TestOffsetSkipsRuns(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=2&limit=2", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", rec.Code)
+	}
+	var runs []Run
+	if err := json.Unmarshal(rec.Body.Bytes(), &runs); err != nil {
+		t.Fatalf("body is not a run list: %v", err)
+	}
+	if len(runs) != 2 {
+		t.Fatalf("want 2 runs, got %d", len(runs))
+	}
+	// Seed runs sorted newest-first: run-105, run-104, run-103, run-102, run-101
+	// Offset 2 skips run-105 and run-104, so the first returned run is run-103.
+	if runs[0].ID != "run-103" {
+		t.Fatalf("want run-103 first, got %s", runs[0].ID)
+	}
+}
+
+func TestAnOffsetPastTheEndIsEmpty(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=10", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", rec.Code)
+	}
+	var runs []Run
+	if err := json.Unmarshal(rec.Body.Bytes(), &runs); err != nil {
+		t.Fatalf("body is not a run list: %v", err)
+	}
+	if len(runs) != 0 {
+		t.Fatalf("want 0 runs, got %d", len(runs))
+	}
+}
+
+func TestOffsetAndLimitTogether(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=1&limit=3", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", rec.Code)
+	}
+	var runs []Run
+	if err := json.Unmarshal(rec.Body.Bytes(), &runs); err != nil {
+		t.Fatalf("body is not a run list: %v", err)
+	}
+	if len(runs) != 3 {
+		t.Fatalf("want 3 runs, got %d", len(runs))
+	}
+	// Offset 1 skips run-105, so the first returned run is run-104.
+	if runs[0].ID != "run-104" {
+		t.Fatalf("want run-104 first, got %s", runs[0].ID)
+	}
+}
+
+func TestANegativeOffsetIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=-1", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_offset" {
+		t.Fatalf("want bad_offset code, got %s", rec.Body.String())
+	}
+}
+
 func TestOneRunCarriesItsStages(t *testing.T) {
 	rec := call(t, Seed(), http.MethodGet, "/runs/run-101", "")
 	var body struct {

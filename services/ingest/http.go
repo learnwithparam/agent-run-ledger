@@ -18,6 +18,22 @@ func Handler(s *Store) http.Handler {
 
 	mux.HandleFunc("GET /runs", func(w http.ResponseWriter, r *http.Request) {
 		runs := s.Runs()
+		// Offset first, then limit. A page past the end returns an empty list
+		// rather than an error, because reaching the last page is expected.
+		offset := 0
+		if raw := r.URL.Query().Get("offset"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 0 {
+				writeError(w, http.StatusBadRequest, "bad_offset", "offset must be a non-negative number.")
+				return
+			}
+			offset = parsed
+		}
+		if offset >= len(runs) {
+			runs = nil
+		} else {
+			runs = runs[offset:]
+		}
 		// Bounded by default. A list that grows without a limit is a list that
 		// eventually takes the page down, and the default is where that is decided.
 		limit := 50
