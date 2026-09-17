@@ -113,6 +113,9 @@ func (s *Store) AddStage(st Stage) error {
 	return nil
 }
 
+// DefaultLimit is the page size when none is specified.
+const DefaultLimit = 50
+
 // Runs lists every run, most recently started first.
 func (s *Store) Runs() []Run {
 	out := make([]Run, 0, len(s.order))
@@ -121,6 +124,28 @@ func (s *Store) Runs() []Run {
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].StartedAt > out[j].StartedAt })
 	return out
+}
+
+// RunsPaginated returns a page of runs and the total count across all pages.
+// Offset is zero-based (default 0). A negative offset is clamped to 0. A
+// negative or zero limit is clamped to DefaultLimit.
+func (s *Store) RunsPaginated(offset, limit int) ([]Run, int) {
+	all := s.Runs()
+	total := len(all)
+	if offset < 0 {
+		offset = 0
+	}
+	if limit <= 0 {
+		limit = DefaultLimit
+	}
+	if offset >= total {
+		return []Run{}, total
+	}
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	return all[offset:end], total
 }
 
 func (s *Store) Run(id string) (Run, bool) {

@@ -41,8 +41,30 @@ async function get<T>(path: string, timeoutMs = 4000): Promise<T> {
 	}
 }
 
-export function listRuns(limit = 50): Promise<Run[]> {
-	return get<Run[]>(`/runs?limit=${limit}`)
+export interface ListRunsResult {
+	runs: Run[]
+	total: number
+	hasMore: boolean
+}
+
+export async function listRuns(limit = 50, offset = 0): Promise<ListRunsResult> {
+	const controller = new AbortController()
+	const timer = setTimeout(() => controller.abort(), 4000)
+	try {
+		const response = await fetch(`${INGEST}/runs?limit=${limit}&offset=${offset}`, {
+			signal: controller.signal,
+			cache: 'no-store',
+		})
+		if (!response.ok) throw new Error(`ingest answered ${response.status} for /runs`)
+		const runs = (await response.json()) as Run[]
+		return {
+			runs,
+			total: Number(response.headers.get('X-Total-Count') ?? runs.length),
+			hasMore: response.headers.get('X-Has-More') === 'true',
+		}
+	} finally {
+		clearTimeout(timer)
+	}
 }
 
 export function readRun(id: string): Promise<RunDetail> {

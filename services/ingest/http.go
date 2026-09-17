@@ -17,10 +17,7 @@ func Handler(s *Store) http.Handler {
 	})
 
 	mux.HandleFunc("GET /runs", func(w http.ResponseWriter, r *http.Request) {
-		runs := s.Runs()
-		// Bounded by default. A list that grows without a limit is a list that
-		// eventually takes the page down, and the default is where that is decided.
-		limit := 50
+		limit := DefaultLimit
 		if raw := r.URL.Query().Get("limit"); raw != "" {
 			parsed, err := strconv.Atoi(raw)
 			if err != nil || parsed < 1 || parsed > 200 {
@@ -29,9 +26,19 @@ func Handler(s *Store) http.Handler {
 			}
 			limit = parsed
 		}
-		if len(runs) > limit {
-			runs = runs[:limit]
+		offset := 0
+		if raw := r.URL.Query().Get("offset"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 0 {
+				writeError(w, http.StatusBadRequest, "bad_offset", "offset must be a number of 0 or greater.")
+				return
+			}
+			offset = parsed
 		}
+		runs, total := s.RunsPaginated(offset, limit)
+		hasMore := offset+len(runs) < total
+		w.Header().Set("X-Total-Count", strconv.Itoa(total))
+		w.Header().Set("X-Has-More", strconv.FormatBool(hasMore))
 		writeJSON(w, http.StatusOK, runs)
 	})
 

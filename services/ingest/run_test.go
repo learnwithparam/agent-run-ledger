@@ -100,6 +100,81 @@ func TestStagesComeBackInLoopOrderNotArrivalOrder(t *testing.T) {
 	}
 }
 
+func TestRunsPaginatedFirstPage(t *testing.T) {
+	s := Seed()
+	runs, total := s.RunsPaginated(0, 3)
+	if len(runs) != 3 {
+		t.Fatalf("want 3 runs, got %d", len(runs))
+	}
+	if total != 5 {
+		t.Fatalf("want total 5, got %d", total)
+	}
+	// Runs are newest first.
+	latest := Seed().Runs()
+	for i := 0; i < len(runs); i++ {
+		if runs[i].ID != latest[i].ID {
+			t.Fatalf("position %d: want %s, got %s", i, latest[i].ID, runs[i].ID)
+		}
+	}
+}
+
+func TestRunsPaginatedSkipsOffset(t *testing.T) {
+	s := Seed()
+	runs, total := s.RunsPaginated(2, 2)
+	if len(runs) != 2 {
+		t.Fatalf("want 2 runs, got %d", len(runs))
+	}
+	if total != 5 {
+		t.Fatalf("want total 5, got %d", total)
+	}
+	latest := Seed().Runs()
+	if runs[0].ID != latest[2].ID {
+		t.Fatalf("first result should be the third run: want %s, got %s", latest[2].ID, runs[0].ID)
+	}
+}
+
+func TestRunsPaginatedPastTotal(t *testing.T) {
+	s := Seed()
+	runs, total := s.RunsPaginated(100, 10)
+	if len(runs) != 0 {
+		t.Fatalf("want 0 runs past total, got %d", len(runs))
+	}
+	if total != 5 {
+		t.Fatalf("want total 5, got %d", total)
+	}
+}
+
+func TestRunsPaginatedNegativeOffsetClamped(t *testing.T) {
+	s := Seed()
+	runs, total := s.RunsPaginated(-1, 3)
+	if len(runs) != 3 {
+		t.Fatalf("want 3 runs (clamped to 0), got %d", len(runs))
+	}
+	if total != 5 {
+		t.Fatalf("want total 5, got %d", total)
+	}
+}
+
+func TestRunsPaginatedZeroOrNegativeLimitClamped(t *testing.T) {
+	s := Seed()
+	runs, total := s.RunsPaginated(0, 0)
+	// Limit clamped to DefaultLimit, but there aren't that many runs. The
+	// point is it doesn't panic or return zero — it returns everything available.
+	if len(runs) != total {
+		t.Fatalf("want %d runs, got %d", total, len(runs))
+	}
+	if total != 5 {
+		t.Fatalf("want total 5, got %d", total)
+	}
+	runs2, total2 := s.RunsPaginated(0, -5)
+	if len(runs2) != total2 {
+		t.Fatalf("want %d runs, got %d", total2, len(runs2))
+	}
+	if total2 != 5 {
+		t.Fatalf("want total 5, got %d", total2)
+	}
+}
+
 func TestTheSeedCarriesARefusal(t *testing.T) {
 	// A lab whose sample data only shows success teaches the wrong lesson.
 	for _, r := range Seed().Runs() {

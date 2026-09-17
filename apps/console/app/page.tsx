@@ -9,13 +9,23 @@ import { BudgetChip, OutcomeChip } from '@/components/state.tsx'
 // and a ledger that is confidently wrong is worse than one that is slow.
 export const dynamic = 'force-dynamic'
 
+/** The number of runs to fetch per page. Must match the ingest service default. */
+const PAGE_SIZE = 50
+
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
-	let runs
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ offset?: string }>
+}) {
+	const { offset: offsetParam } = await searchParams
+	const offset = Math.max(0, parseInt(offsetParam ?? '0', 10) || 0)
+
+	let result
 	try {
-		runs = await listRuns()
+		result = await listRuns(PAGE_SIZE, offset)
 	} catch (error) {
 		return (
 			<Shell>
@@ -23,6 +33,8 @@ export default async function Page() {
 			</Shell>
 		)
 	}
+
+	const { runs, total, hasMore } = result
 
 	if (runs.length === 0) {
 		return (
@@ -36,6 +48,8 @@ export default async function Page() {
 	const spend = spendFor(runs, period)
 	const budget = spend ? await assess(period, MONTHLY_LIMIT_MINOR, spend.minor, spend.currency) : undefined
 	const refused = runs.filter((run) => run.outcome === 'refused').length
+	const pageNumber = Math.floor(offset / PAGE_SIZE) + 1
+	const totalPages = Math.ceil(total / PAGE_SIZE)
 
 	return (
 		<Shell>
@@ -45,7 +59,7 @@ export default async function Page() {
 						<div className="metric">
 							<dt>Runs</dt>
 							<dd>
-								{runs.length}
+								{total}
 								<small>{refused} refused by policy</small>
 							</dd>
 						</div>
@@ -115,6 +129,22 @@ export default async function Page() {
 							))}
 						</tbody>
 					</table>
+
+					<nav className="pagination">
+						{offset > 0 ? (
+							<Link href={`/?offset=${offset - PAGE_SIZE}`}>← Previous</Link>
+						) : (
+							<span className="disabled">← Previous</span>
+						)}
+						<span className="page-info">
+							Page {pageNumber} of {totalPages}
+						</span>
+						{hasMore ? (
+							<Link href={`/?offset=${offset + PAGE_SIZE}`}>Next →</Link>
+						) : (
+							<span className="disabled">Next →</span>
+						)}
+					</nav>
 				</div>
 			</main>
 		</Shell>
