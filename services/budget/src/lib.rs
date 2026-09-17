@@ -68,7 +68,7 @@ pub enum BudgetError {
 }
 
 /// Spend at or above this share of the limit is a warning.
-const WARNING_PERCENT: i64 = 80;
+const WARNING_PERCENT: i64 = 70;
 
 /// A period is a calendar month, written as `YYYY-MM`.
 fn period_is_well_formed(period: &str) -> bool {
