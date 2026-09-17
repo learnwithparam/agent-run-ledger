@@ -86,9 +86,10 @@ func (s *Store) PutRun(r Run) error {
 	if err := window(r.StartedAt, r.EndedAt); err != nil {
 		return err
 	}
-	if r.TokensIn < 0 || r.TokensOut < 0 || r.CostMinor < 0 || r.ToolCalls < 0 {
+	if r.TokensIn < 0 || r.TokensOut < 0 || r.CostMinor < 0 {
 		return ErrNegativeCount
 	}
+	r.ToolCalls = 0 // the service computes tool calls from stages, not the caller
 	if _, seen := s.runs[r.ID]; !seen {
 		s.order = append(s.order, r.ID)
 	}
@@ -111,6 +112,12 @@ func (s *Store) AddStage(st Stage) error {
 		return ErrNegativeCount
 	}
 	s.stages[st.RunID] = append(s.stages[st.RunID], st)
+	r := s.runs[st.RunID]
+	r.ToolCalls = 0
+	for _, stage := range s.stages[st.RunID] {
+		r.ToolCalls += stage.ToolCalls
+	}
+	s.runs[st.RunID] = r
 	return nil
 }
 

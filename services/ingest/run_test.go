@@ -109,3 +109,37 @@ func TestTheSeedCarriesARefusal(t *testing.T) {
 	}
 	t.Fatal("no refused run in the seed")
 }
+
+func TestAddStageRecomputesRunToolCalls(t *testing.T) {
+	// The service computes a run's tool calls from its stages, so it always reflects
+	// what the ledger holds, not what a caller put on the run record.
+	s := NewStore()
+	if err := s.PutRun(aRun()); err != nil {
+		t.Fatal(err)
+	}
+	if r, _ := s.Run("run-1"); r.ToolCalls != 0 {
+		t.Fatalf("PutRun left ToolCalls as %d, want 0", r.ToolCalls)
+	}
+	stages := []Stage{
+		{RunID: "run-1", Name: "claim", StartedAt: "2026-09-16T10:00:00Z", EndedAt: "2026-09-16T10:00:01Z", ToolCalls: 2},
+		{RunID: "run-1", Name: "context", StartedAt: "2026-09-16T10:00:01Z", EndedAt: "2026-09-16T10:00:05Z", ToolCalls: 5},
+		{RunID: "run-1", Name: "implement", StartedAt: "2026-09-16T10:00:05Z", EndedAt: "2026-09-16T10:01:00Z", ToolCalls: 13},
+	}
+	for _, st := range stages {
+		if err := s.AddStage(st); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if r, _ := s.Run("run-1"); r.ToolCalls != 20 {
+		t.Fatalf("ToolCalls = %d after adding stages summing to 20, want 20", r.ToolCalls)
+	}
+	// Adding another stage updates the total.
+	if err := s.AddStage(Stage{
+		RunID: "run-1", Name: "verify", StartedAt: "2026-09-16T10:01:00Z", EndedAt: "2026-09-16T10:01:10Z", ToolCalls: 7,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if r, _ := s.Run("run-1"); r.ToolCalls != 27 {
+		t.Fatalf("ToolCalls = %d after adding a stage with 7 tool calls, want 27", r.ToolCalls)
+	}
+}
