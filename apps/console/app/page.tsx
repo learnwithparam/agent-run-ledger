@@ -12,10 +12,18 @@ export const dynamic = 'force-dynamic'
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ offset?: string }>
+}) {
+	const params = await searchParams
+	const offset = Math.max(0, Number(params.offset) || 0)
+	const limit = 50
+
 	let runs
 	try {
-		runs = await listRuns()
+		runs = await listRuns(limit, offset)
 	} catch (error) {
 		return (
 			<Shell>
@@ -36,6 +44,9 @@ export default async function Page() {
 	const spend = spendFor(runs, period)
 	const budget = spend ? await assess(period, MONTHLY_LIMIT_MINOR, spend.minor, spend.currency) : undefined
 	const refused = runs.filter((run) => run.outcome === 'refused').length
+
+	const hasNext = runs.length === limit
+	const hasPrev = offset > 0
 
 	return (
 		<Shell>
@@ -115,6 +126,18 @@ export default async function Page() {
 							))}
 						</tbody>
 					</table>
+					<nav className="pagination">
+						{hasPrev ? (
+							<Link href={`?offset=${offset - limit}`}>← Newer</Link>
+						) : (
+							<span className="disabled">← Newer</span>
+						)}
+						{hasNext ? (
+							<Link href={`?offset=${offset + limit}`}>Older →</Link>
+						) : (
+							<span className="disabled">Older →</span>
+						)}
+					</nav>
 				</div>
 			</main>
 		</Shell>

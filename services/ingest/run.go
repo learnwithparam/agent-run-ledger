@@ -113,6 +113,19 @@ func (s *Store) AddStage(st Stage) error {
 	return nil
 }
 
+// RunsPaginated returns a slice of runs for the given page, newest first.
+func (s *Store) RunsPaginated(limit, offset int) []Run {
+	all := s.Runs()
+	if offset >= len(all) {
+		return nil
+	}
+	end := offset + limit
+	if end > len(all) {
+		end = len(all)
+	}
+	return all[offset:end]
+}
+
 // Runs lists every run, most recently started first.
 func (s *Store) Runs() []Run {
 	out := make([]Run, 0, len(s.order))
