@@ -8,3 +8,4 @@ out/
 .DS_Store
 services/budget/target/
 next-env.d.ts
+.artifacts/
