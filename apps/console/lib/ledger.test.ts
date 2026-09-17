@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { Stage } from '@ledger/contracts'
-import { humanMs, slowestStage, waterfall } from './ledger.ts'
+import { humanMs, listRuns, slowestStage, waterfall } from './ledger.ts'
 
 function stage(name: Stage['name'], from: string, to: string, toolCalls = 0): Stage {
 	return { runId: 'r', name, startedAt: from, endedAt: to, toolCalls }
@@ -58,5 +58,38 @@ describe('humanMs', () => {
 
 	it('pads the seconds so a column of times lines up', () => {
 		expect(humanMs(305_000)).toBe('5m 05s')
+	})
+})
+
+describe('listRuns', () => {
+	it('passes offset to the API', async () => {
+		const originalFetch = globalThis.fetch as unknown
+		let calledPath = ''
+		globalThis.fetch = async (input: RequestInfo | URL) => {
+			calledPath = typeof input === 'string' ? input : input.toString()
+			return new Response('[]', { status: 200 })
+		}
+		try {
+			await listRuns(50, 10)
+			expect(calledPath).toContain('offset=10')
+			expect(calledPath).toContain('limit=50')
+		} finally {
+			globalThis.fetch = originalFetch as typeof globalThis.fetch
+		}
+	})
+
+	it('defaults offset to 0', async () => {
+		const originalFetch = globalThis.fetch as unknown
+		let calledPath = ''
+		globalThis.fetch = async (input: RequestInfo | URL) => {
+			calledPath = typeof input === 'string' ? input : input.toString()
+			return new Response('[]', { status: 200 })
+		}
+		try {
+			await listRuns()
+			expect(calledPath).toContain('offset=0')
+		} finally {
+			globalThis.fetch = originalFetch as typeof globalThis.fetch
+		}
 	})
 })

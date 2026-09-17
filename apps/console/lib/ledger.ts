@@ -41,8 +41,8 @@ async function get<T>(path: string, timeoutMs = 4000): Promise<T> {
 	}
 }
 
-export function listRuns(limit = 50): Promise<Run[]> {
-	return get<Run[]>(`/runs?limit=${limit}`)
+export function listRuns(limit = 50, offset = 0): Promise<Run[]> {
+	return get<Run[]>(`/runs?limit=${limit}&offset=${offset}`)
 }
 
 export function readRun(id: string): Promise<RunDetail> {

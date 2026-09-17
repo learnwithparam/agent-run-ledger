@@ -12,10 +12,18 @@ export const dynamic = 'force-dynamic'
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ page?: string }>
+}) {
+	const { page: pageStr } = await searchParams
+	const page = Math.max(1, Number(pageStr) || 1)
+	const offset = (page - 1) * 50
+
 	let runs
 	try {
-		runs = await listRuns()
+		runs = await listRuns(50, offset)
 	} catch (error) {
 		return (
 			<Shell>
@@ -36,6 +44,7 @@ export default async function Page() {
 	const spend = spendFor(runs, period)
 	const budget = spend ? await assess(period, MONTHLY_LIMIT_MINOR, spend.minor, spend.currency) : undefined
 	const refused = runs.filter((run) => run.outcome === 'refused').length
+	const hasNext = runs.length === 50
 
 	return (
 		<Shell>
@@ -115,6 +124,14 @@ export default async function Page() {
 							))}
 						</tbody>
 					</table>
+					<nav className="pagination">
+						{page > 1 && (
+							<Link href={`/?page=${page - 1}`}>← Previous</Link>
+						)}
+						{hasNext && (
+							<Link href={`/?page=${page + 1}`}>Next →</Link>
+						)}
+					</nav>
 				</div>
 			</main>
 		</Shell>

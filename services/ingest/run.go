@@ -113,14 +113,22 @@ func (s *Store) AddStage(st Stage) error {
 	return nil
 }
 
-// Runs lists every run, most recently started first.
-func (s *Store) Runs() []Run {
+// Runs returns a page of runs, most recently started first. An offset past the
+// end of the list returns an empty slice.
+func (s *Store) Runs(offset, limit int) []Run {
 	out := make([]Run, 0, len(s.order))
 	for _, id := range s.order {
 		out = append(out, s.runs[id])
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].StartedAt > out[j].StartedAt })
-	return out
+	if offset >= len(out) {
+		return nil
+	}
+	end := offset + limit
+	if end > len(out) {
+		end = len(out)
+	}
+	return out[offset:end]
 }
 
 func (s *Store) Run(id string) (Run, bool) {

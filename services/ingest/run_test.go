@@ -24,7 +24,7 @@ func TestRecordingTheSameRunTwiceKeepsOneEntry(t *testing.T) {
 	if err := s.PutRun(updated); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(s.Runs()); got != 1 {
+	if got := len(s.Runs(0, 999)); got != 1 {
 		t.Fatalf("want 1 run, got %d", got)
 	}
 	if r, _ := s.Run("run-1"); r.CostMinor != 4 {
@@ -33,7 +33,7 @@ func TestRecordingTheSameRunTwiceKeepsOneEntry(t *testing.T) {
 }
 
 func TestRunsAreListedNewestFirst(t *testing.T) {
-	runs := Seed().Runs()
+	runs := Seed().Runs(0, 999)
 	for i := 1; i < len(runs); i++ {
 		if runs[i-1].StartedAt < runs[i].StartedAt {
 			t.Fatalf("out of order at %d: %s before %s", i, runs[i-1].StartedAt, runs[i].StartedAt)
@@ -102,7 +102,7 @@ func TestStagesComeBackInLoopOrderNotArrivalOrder(t *testing.T) {
 
 func TestTheSeedCarriesARefusal(t *testing.T) {
 	// A lab whose sample data only shows success teaches the wrong lesson.
-	for _, r := range Seed().Runs() {
+	for _, r := range Seed().Runs(0, 999) {
 		if r.Outcome == "refused" {
 			return
 		}

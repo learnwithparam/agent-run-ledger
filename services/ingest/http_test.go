@@ -49,6 +49,43 @@ func TestAnAbsurdLimitIsRefused(t *testing.T) {
 	}
 }
 
+func TestOffsetSkipsFirstNRuns(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=2", "")
+	var runs []Run
+	_ = json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 3 {
+		t.Fatalf("want 3 runs (5 total, offset 2), got %d", len(runs))
+	}
+}
+
+func TestOffsetCombinedWithLimit(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=1&limit=2", "")
+	var runs []Run
+	_ = json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 2 {
+		t.Fatalf("want 2 runs, got %d", len(runs))
+	}
+}
+
+func TestOffsetPastEndReturnsEmpty(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=100", "")
+	var runs []Run
+	_ = json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 0 {
+		t.Fatalf("want 0 runs (offset past end), got %d", len(runs))
+	}
+}
+
+func TestNegativeOffsetIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=-1", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_offset" {
+		t.Fatalf("want a machine-readable code, got %s", rec.Body.String())
+	}
+}
+
 func TestOneRunCarriesItsStages(t *testing.T) {
 	rec := call(t, Seed(), http.MethodGet, "/runs/run-101", "")
 	var body struct {
