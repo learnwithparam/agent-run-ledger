@@ -43,6 +43,16 @@ and the factory runs only the ones a change reaches.
 (cd apps/console && bun test)
 ```
 
+## Contributing
+
+Changes are welcome. To propose one:
+
+1. **Fork** this repository and create a branch for your change.
+2. **Set up** — `bun install` from the project root.
+3. **Make your change**, keeping it focused. Before you invest time, check [`.factory/targets.json`](.factory/README.md) — some paths are `refuse` (a person must touch them) and others are `propose` (a person must approve the plan first).
+4. **Run the checks** for every area your change reaches (see [Checks](#checks) above).
+5. **Open a pull request** describing what changed and why. A maintainer reviews it before it merges.
+
 ## License
 
 [MIT](LICENSE)
