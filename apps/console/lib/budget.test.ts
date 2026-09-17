@@ -11,6 +11,7 @@ function run(costMinor: number, startedAt: string, currency: Run['currency'] = '
 		endedAt: startedAt,
 		tokensIn: 0,
 		tokensOut: 0,
+		toolCalls: 0,
 		costMinor,
 		currency,
 	}

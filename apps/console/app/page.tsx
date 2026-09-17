@@ -90,10 +90,11 @@ export default async function Page() {
 					<table>
 						<thead>
 							<tr>
-								<th>Item</th>
+								<th className="num">Item</th>
 								<th>Outcome</th>
 								<th className="num">Took</th>
 								<th className="num">Tokens</th>
+								<th className="num">Calls</th>
 								<th className="num">Cost</th>
 								<th>Run</th>
 							</tr>
@@ -109,6 +110,7 @@ export default async function Page() {
 									</td>
 									<td className="num">{humanMs(durationMs(run.startedAt, run.endedAt))}</td>
 									<td className="num">{(run.tokensIn + run.tokensOut).toLocaleString('en')}</td>
+									<td className="num">{run.toolCalls.toLocaleString('en')}</td>
 									<td className="num">{formatMinor(run.costMinor, run.currency)}</td>
 									<td className="id">{run.id}</td>
 								</tr>

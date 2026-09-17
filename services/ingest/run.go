@@ -21,6 +21,7 @@ type Run struct {
 	EndedAt   string `json:"endedAt"`
 	TokensIn  int    `json:"tokensIn"`
 	TokensOut int    `json:"tokensOut"`
+	ToolCalls int    `json:"toolCalls"`
 	CostMinor int    `json:"costMinor"`
 	Currency  string `json:"currency"`
 }
@@ -85,7 +86,7 @@ func (s *Store) PutRun(r Run) error {
 	if err := window(r.StartedAt, r.EndedAt); err != nil {
 		return err
 	}
-	if r.TokensIn < 0 || r.TokensOut < 0 || r.CostMinor < 0 {
+	if r.TokensIn < 0 || r.TokensOut < 0 || r.ToolCalls < 0 || r.CostMinor < 0 {
 		return ErrNegativeCount
 	}
 	if _, seen := s.runs[r.ID]; !seen {
