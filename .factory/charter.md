@@ -2,8 +2,8 @@
 
 What an agent may attempt in the agent run ledger without asking, and what it must never touch.
 
-This file belongs to this repository. A factory pointed at it reads these rules and no others; point
-the same factory at another repository and it reads that one instead.
+This is the `scaleup` shape. The factory is the same under all four; this file is the only thing
+that differs, which is the point.
 
 This file is owned by a person. An agent may propose a change to it, and that proposal is read
 like any other pull request. Nothing in the factory rewrites it, because limits an agent can edit
@@ -14,7 +14,7 @@ are not limits.
 `TIER: supervised`
 
 Work may be planned and implemented unattended. Nothing merges without a named engineer approving
-it, on any tier, ever.
+it, on any tier, ever. Runs are started deliberately rather than on arrival.
 
 ## Autonomy, per target
 
@@ -28,6 +28,9 @@ whoever is on call.
 | `propose` | Investigate and plan. A person accepts the plan before any code is written |
 | `refuse` | Stop. Record the reason and route the item to a person |
 
+Under this shape the money path is `refuse`. The money path has an owning team, and an item that reaches it belongs in their queue rather than
+in a plan written by whoever filed it.
+
 Levels live in `.factory/targets.json` beside the paths they govern, so a new directory cannot
 quietly inherit a permission nobody granted it.
 
@@ -37,7 +40,6 @@ Never modified by an agent, at any tier. This block is what the factory reads, a
 each line is part of it, so a path cannot be added without saying why.
 
 ```protected
-services/budget/**        # the money path, and a wrong answer here is expensive and slow to notice
 .factory/targets.json     # editing the ownership graph would widen every other rule in this file
 .factory/charter.md       # limits an agent can edit are not limits
 AGENTS.md                 # it repeats those limits, so the same argument applies to it
@@ -65,8 +67,8 @@ A task is done when all of these hold. Any one missing is not done.
 
 The factory stops producing when any of these is true. Stopping is a result, not a fault.
 
-- `STOP_IF: awaiting_review >= 3`. The limit is how many decisions can be waiting on a person, not
-  how much can be generated. When the queue is full, starting more work makes things worse
+- `STOP_IF: awaiting_review >= 5`. The limit is how many decisions can be waiting on a person,
+  not how much can be generated. When the queue is full, starting more work makes things worse
 - A task needs a path the graph marks `refuse`
 - A task has failed its checks twice with the reason attached, and still fails
 - A stage has run past its budget, which the factory declares and this file does not
@@ -74,5 +76,5 @@ The factory stops producing when any of these is true. Stopping is a result, not
 
 ## What a person still does
 
-Writes this file. Approves plans for anything marked `propose`. Reads every change to a protected
-path. Decides what merges. Accepts or rejects proposed changes to these constraints.
+Writes this file. Starts runs. Accepts plans for anything marked `propose`. Owns the money path
+outright: items that reach it are routed to that team rather than planned here.
