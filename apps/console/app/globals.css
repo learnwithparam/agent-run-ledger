@@ -108,6 +108,35 @@ td.id { font-family: var(--font-mono); color: var(--c-ink-muted); white-space: n
 
 footer { border-top: 1px solid var(--c-line); padding: var(--space-8) 0; color: var(--c-ink-muted); font-size: var(--step--1); }
 
+/* Pagination -------------------------------------------------------------- */
+
+.pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: var(--space-6) 0 0;
+	gap: var(--space-4);
+}
+.pagination .pages {
+	font-family: var(--font-mono);
+	font-size: var(--step--1);
+	color: var(--c-ink-muted);
+}
+.pagination a {
+	font-family: var(--font-mono);
+	font-size: var(--step--1);
+	color: var(--c-accent);
+	text-decoration: none;
+	padding: var(--space-2) var(--space-4);
+	border: 1px solid var(--c-line);
+	border-radius: var(--radius-sm);
+}
+.pagination a:hover {
+	background: var(--c-bg-alt);
+	border-color: var(--c-accent);
+}
+.pagination span:empty { display: block; min-width: 5rem; }
+
 @media (max-width: 46rem) {
 	.wrap { padding: 0 var(--space-4); }
 	header.mast h1 { font-size: var(--step-3); }

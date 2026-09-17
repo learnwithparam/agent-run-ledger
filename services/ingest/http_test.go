@@ -96,6 +96,43 @@ func TestHealthz(t *testing.T) {
 	}
 }
 
+func TestOffsetSkipsRuns(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=2", "")
+	var runs []Run
+	_ = json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 3 {
+		t.Fatalf("want 3 runs, got %d", len(runs))
+	}
+}
+
+func TestOffsetWithLimit(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=1&limit=2", "")
+	var runs []Run
+	_ = json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 2 {
+		t.Fatalf("want 2 runs, got %d", len(runs))
+	}
+}
+
+func TestOffsetBeyondTheListReturnsNothing(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=100", "")
+	var runs []Run
+	_ = json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 0 {
+		t.Fatalf("want 0 runs, got %d", len(runs))
+	}
+}
+
+func TestABadOffsetIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?offset=-1", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_offset" {
+		t.Fatalf("want a machine-readable code, got %s", rec.Body.String())
+	}
+}
+
 func code(t *testing.T, body []byte) string {
 	t.Helper()
 	var out map[string]string

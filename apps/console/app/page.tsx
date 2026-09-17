@@ -12,10 +12,24 @@ export const dynamic = 'force-dynamic'
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
-	let runs
+/** How many runs the page is allowed to fetch. The server caps the same number. */
+const MAX_LIST = 200
+
+/** How many runs to show at once. */
+const PAGE_SIZE = 50
+
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ page?: string }>
+}) {
+	const { page: pageParam } = await searchParams
+	const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
+	const offset = (page - 1) * PAGE_SIZE
+
+	let allRuns
 	try {
-		runs = await listRuns()
+		allRuns = await listRuns(MAX_LIST, 0)
 	} catch (error) {
 		return (
 			<Shell>
@@ -24,7 +38,7 @@ export default async function Page() {
 		)
 	}
 
-	if (runs.length === 0) {
+	if (allRuns.length === 0) {
 		return (
 			<Shell>
 				<NoRuns />
@@ -32,10 +46,13 @@ export default async function Page() {
 		)
 	}
 
-	const period = periodOf(runs[0]!.startedAt)
-	const spend = spendFor(runs, period)
+	const pageRuns = allRuns.slice(offset, offset + PAGE_SIZE)
+	const totalPages = Math.max(1, Math.ceil(allRuns.length / PAGE_SIZE))
+
+	const period = periodOf(allRuns[0]!.startedAt)
+	const spend = spendFor(allRuns, period)
 	const budget = spend ? await assess(period, MONTHLY_LIMIT_MINOR, spend.minor, spend.currency) : undefined
-	const refused = runs.filter((run) => run.outcome === 'refused').length
+	const refused = allRuns.filter((run) => run.outcome === 'refused').length
 
 	return (
 		<Shell>
@@ -45,7 +62,7 @@ export default async function Page() {
 						<div className="metric">
 							<dt>Runs</dt>
 							<dd>
-								{runs.length}
+								{allRuns.length}
 								<small>{refused} refused by policy</small>
 							</dd>
 						</div>
@@ -72,7 +89,7 @@ export default async function Page() {
 						<div className="metric">
 							<dt>Tokens</dt>
 							<dd>
-								{runs.reduce((sum, run) => sum + run.tokensIn + run.tokensOut, 0).toLocaleString('en')}
+								{allRuns.reduce((sum, run) => sum + run.tokensIn + run.tokensOut, 0).toLocaleString('en')}
 								<small>in and out, every run</small>
 							</dd>
 						</div>
@@ -99,7 +116,7 @@ export default async function Page() {
 							</tr>
 						</thead>
 						<tbody>
-							{runs.map((run) => (
+							{pageRuns.map((run) => (
 								<tr key={run.id}>
 									<td className="item">
 										<Link href={`/runs/${run.id}`}>{run.item}</Link>
@@ -115,6 +132,28 @@ export default async function Page() {
 							))}
 						</tbody>
 					</table>
+
+					{totalPages > 1 ? (
+						<nav className="pagination">
+							{page > 1 ? (
+								<Link className="prev" href={page === 2 ? '/' : `/?page=${page - 1}`}>
+									&larr; Newer
+								</Link>
+							) : (
+								<span />
+							)}
+							<span className="pages">
+								Page {page} of {totalPages}
+							</span>
+							{page < totalPages ? (
+								<Link className="next" href={`/?page=${page + 1}`}>
+									Older &rarr;
+								</Link>
+							) : (
+								<span />
+							)}
+						</nav>
+					) : null}
 				</div>
 			</main>
 		</Shell>

@@ -29,8 +29,22 @@ func Handler(s *Store) http.Handler {
 			}
 			limit = parsed
 		}
-		if len(runs) > limit {
-			runs = runs[:limit]
+		offset := 0
+		if raw := r.URL.Query().Get("offset"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 0 {
+				writeError(w, http.StatusBadRequest, "bad_offset", "offset must be a non-negative number.")
+				return
+			}
+			offset = parsed
+		}
+		if offset >= len(runs) {
+			runs = nil
+		} else {
+			runs = runs[offset:]
+			if len(runs) > limit {
+				runs = runs[:limit]
+			}
 		}
 		writeJSON(w, http.StatusOK, runs)
 	})
