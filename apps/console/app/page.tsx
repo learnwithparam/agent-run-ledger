@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { durationMs, formatMinor } from '@ledger/contracts'
 import { assess, periodOf, spendFor } from '@/lib/budget.ts'
 import { humanMs, listRuns } from '@/lib/ledger.ts'
-import { NoRuns, Unreachable } from '@/components/empty.tsx'
+import { NoRuns, NoMoreRuns, Unreachable } from '@/components/empty.tsx'
 import { BudgetChip, OutcomeChip } from '@/components/state.tsx'
 
 // Never prerendered. A cached page would show a run count that is quietly stale,
@@ -12,10 +12,19 @@ export const dynamic = 'force-dynamic'
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ page?: string }>
+}) {
+	const sp = await searchParams
+	const page = Math.max(1, sp.page ? parseInt(sp.page) : 1)
+	const limit = 50
+	const offset = (page - 1) * limit
+
 	let runs
 	try {
-		runs = await listRuns()
+		runs = await listRuns(limit, offset)
 	} catch (error) {
 		return (
 			<Shell>
@@ -27,7 +36,7 @@ export default async function Page() {
 	if (runs.length === 0) {
 		return (
 			<Shell>
-				<NoRuns />
+				{page > 1 ? <NoMoreRuns /> : <NoRuns />}
 			</Shell>
 		)
 	}
@@ -115,6 +124,18 @@ export default async function Page() {
 							))}
 						</tbody>
 					</table>
+					<nav className="pagination">
+						{page > 1 && (
+							<Link href={page === 2 ? '/' : `/?page=${page - 1}`}>
+								&larr; Newer runs
+							</Link>
+						)}
+						{runs.length >= limit && (
+							<Link href={`/?page=${page + 1}`}>
+								Older runs &rarr;
+							</Link>
+						)}
+					</nav>
 				</div>
 			</main>
 		</Shell>

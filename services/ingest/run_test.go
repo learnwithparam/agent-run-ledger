@@ -109,3 +109,37 @@ func TestTheSeedCarriesARefusal(t *testing.T) {
 	}
 	t.Fatal("no refused run in the seed")
 }
+
+func TestRunsPaginatedReturnsTheCorrectSlice(t *testing.T) {
+	seed := Seed() // 5 runs sorted newest-first: 105, 104, 103, 102, 101
+	page := seed.RunsPaginated(2, 2)
+	if len(page) != 2 {
+		t.Fatalf("want 2 runs, got %d", len(page))
+	}
+	// offset 2 means skip the 2 newest (105, 104), return the next 2 (103, 102)
+	if page[0].ID != "run-103" {
+		t.Fatalf("first item: want run-103, got %s", page[0].ID)
+	}
+	if page[1].ID != "run-102" {
+		t.Fatalf("second item: want run-102, got %s", page[1].ID)
+	}
+}
+
+func TestRunsPaginatedOffsetAtEndReturnsEmpty(t *testing.T) {
+	if got := Seed().RunsPaginated(5, 50); got != nil {
+		t.Fatal("expected nil for offset at list end")
+	}
+}
+
+func TestRunsPaginatedOffsetBeyondTotalReturnsEmpty(t *testing.T) {
+	if got := Seed().RunsPaginated(100, 50); got != nil {
+		t.Fatal("expected nil for offset beyond list end")
+	}
+}
+
+func TestRunsPaginatedDefaultOffsetReturnsAll(t *testing.T) {
+	page := Seed().RunsPaginated(0, 200)
+	if len(page) != 5 {
+		t.Fatalf("want 5 runs, got %d", len(page))
+	}
+}

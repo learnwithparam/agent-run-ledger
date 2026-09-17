@@ -123,6 +123,21 @@ func (s *Store) Runs() []Run {
 	return out
 }
 
+// RunsPaginated returns a page of runs from the full list, most recently started
+// first. offset is zero-based; limit caps the page size. An offset past the end
+// of the list returns nil.
+func (s *Store) RunsPaginated(offset, limit int) []Run {
+	all := s.Runs()
+	if offset >= len(all) {
+		return nil
+	}
+	end := offset + limit
+	if end > len(all) {
+		end = len(all)
+	}
+	return all[offset:end]
+}
+
 func (s *Store) Run(id string) (Run, bool) {
 	r, ok := s.runs[id]
 	return r, ok

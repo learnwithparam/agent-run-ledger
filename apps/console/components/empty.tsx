@@ -21,3 +21,13 @@ export function NoRuns() {
 		</div>
 	)
 }
+
+/** What the page shows when pagination goes past the last available run. */
+export function NoMoreRuns() {
+	return (
+		<div className="empty">
+			<h3>No more runs to show</h3>
+			<p>This is the beginning of the ledger. Try a smaller page number.</p>
+		</div>
+	)
+}
