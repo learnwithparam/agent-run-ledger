@@ -106,6 +106,13 @@ td.id { font-family: var(--font-mono); color: var(--c-ink-muted); white-space: n
 .empty h3 { margin: 0 0 var(--space-2); color: var(--c-ink); font-size: var(--step-1); }
 .empty code { font-family: var(--font-mono); background: var(--c-bg-inset); border-radius: var(--radius-sm); padding: 0.1em 0.35em; }
 
+/* Pagination --------------------------------------------------------------- */
+
+.pagination { display: flex; gap: var(--space-4); justify-content: center; margin-top: var(--space-8); }
+.pagination a { font-family: var(--font-mono); font-size: var(--step--1); color: var(--c-accent); text-decoration: none; padding: var(--space-2) var(--space-4); border: 1px solid var(--c-line); border-radius: var(--radius-sm); }
+.pagination a:hover { background: var(--c-bg-alt); }
+.pagination .disabled { font-family: var(--font-mono); font-size: var(--step--1); color: var(--c-ink-muted); padding: var(--space-2) var(--space-4); border: 1px solid var(--c-line); border-radius: var(--radius-sm); opacity: 0.4; cursor: default; }
+
 footer { border-top: 1px solid var(--c-line); padding: var(--space-8) 0; color: var(--c-ink-muted); font-size: var(--step--1); }
 
 @media (max-width: 46rem) {

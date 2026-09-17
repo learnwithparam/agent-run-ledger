@@ -49,6 +49,37 @@ func TestAnUnknownOutcomeIsRefused(t *testing.T) {
 	}
 }
 
+func TestRunsPaginatedReturnsPages(t *testing.T) {
+	s := Seed()
+	tests := []struct {
+		name        string
+		limit, off  int
+		want        int
+	}{
+		{"first page of 2", 2, 0, 2},
+		{"second page of 2", 2, 2, 2},
+		{"third page of 2 (partial)", 2, 4, 1},
+		{"beyond end", 2, 10, 0},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := s.RunsPaginated(tc.limit, tc.off)
+			if len(got) != tc.want {
+				t.Fatalf("want %d runs, got %d", tc.want, len(got))
+			}
+		})
+	}
+}
+
+func TestRunsPaginatedPreservesOrder(t *testing.T) {
+	got := Seed().RunsPaginated(10, 0)
+	for i := 1; i < len(got); i++ {
+		if got[i-1].StartedAt < got[i].StartedAt {
+			t.Fatalf("out of order at %d: %s before %s", i, got[i-1].StartedAt, got[i].StartedAt)
+		}
+	}
+}
+
 func TestARunThatEndsBeforeItStartsIsRefused(t *testing.T) {
 	r := aRun()
 	r.EndedAt = "2026-09-16T09:00:00Z"
