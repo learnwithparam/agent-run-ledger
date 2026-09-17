@@ -23,7 +23,7 @@ func Handler(s *Store) http.Handler {
 		limit := 50
 		if raw := r.URL.Query().Get("limit"); raw != "" {
 			parsed, err := strconv.Atoi(raw)
-			if err != nil || parsed < 1 || parsed > 200 {
+			if err != nil || parsed < 0 || parsed > 200 {
 				writeError(w, http.StatusBadRequest, "bad_limit", "limit must be a number between 1 and 200.")
 				return
 			}
