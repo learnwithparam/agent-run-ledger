@@ -43,6 +43,18 @@ and the factory runs only the ones a change reaches.
 (cd apps/console && bun test)
 ```
 
+## Contributing
+
+Changes are welcome. Every pull request is reviewed by a person before it merges.
+
+1. **Fork** this repository and create a branch for your change.
+2. **Set up** — `bun install` from the project root.
+3. **Make your change**, keeping it focused. Before you invest time, check
+   [`.factory/README.md`](.factory/README.md) — some paths are marked `refuse` (a person must
+   touch them) and `propose` (a plan must be approved first).
+4. **Run the checks** for every area your change reaches (see [Checks](#checks) above).
+5. **Open a pull request** describing what changed and why.
+
 ## License
 
 [MIT](LICENSE)
