@@ -64,7 +64,7 @@ export default async function Page() {
 								{budget?.ok ? <BudgetChip state={budget.budget.state} /> : 'unknown'}
 								<small>
 									{budget?.ok
-										? `${formatMinor(budget.budget.remainingMinor, budget.budget.currency)} remaining`
+										? `${formatMinor(Math.max(0, budget.budget.remainingMinor), budget.budget.currency)} remaining`
 										: (budget?.reason ?? 'no spend to assess')}
 								</small>
 							</dd>
