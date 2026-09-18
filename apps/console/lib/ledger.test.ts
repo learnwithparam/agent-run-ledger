@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { Stage } from '@ledger/contracts'
-import { humanMs, slowestStage, waterfall } from './ledger.ts'
+import { formatCostPerThousand, humanMs, slowestStage, waterfall } from './ledger.ts'
 
 function stage(name: Stage['name'], from: string, to: string, toolCalls = 0): Stage {
 	return { runId: 'r', name, startedAt: from, endedAt: to, toolCalls }
@@ -58,5 +58,24 @@ describe('humanMs', () => {
 
 	it('pads the seconds so a column of times lines up', () => {
 		expect(humanMs(305_000)).toBe('5m 05s')
+	})
+})
+
+describe('formatCostPerThousand', () => {
+	it('computes the rate from cost and the sum of tokens', () => {
+		// 74 minor units / 46300 total tokens * 1000 = 1.598...
+		expect(formatCostPerThousand(41200, 5100, 74, 'EUR')).toBe('€1.60 /1k')
+	})
+
+	it('rounds to two decimal places', () => {
+		expect(formatCostPerThousand(10000, 2000, 100, 'USD')).toBe('$8.33 /1k')
+	})
+
+	it('shows an em dash when there are no tokens to divide by', () => {
+		expect(formatCostPerThousand(0, 0, 50, 'EUR')).toBe('—')
+	})
+
+	it('shows zero when the run was free', () => {
+		expect(formatCostPerThousand(1000, 500, 0, 'USD')).toBe('$0.00 /1k')
 	})
 })

@@ -7,7 +7,7 @@
  * one resolver per concept, and the view is never the resolver.
  */
 
-import type { Budget, Run, Stage, StageName } from '@ledger/contracts'
+import type { Budget, Currency, Run, Stage, StageName } from '@ledger/contracts'
 import { STAGE_ORDER, durationMs } from '@ledger/contracts'
 
 export interface RunDetail {
@@ -82,6 +82,21 @@ export function humanMs(ms: number): string {
 	const seconds = Math.round(ms / 1000)
 	if (seconds < 60) return `${seconds}s`
 	return `${Math.floor(seconds / 60)}m ${String(seconds % 60).padStart(2, '0')}s`
+}
+
+/**
+ * Cost per thousand tokens, as a rate a reader can compare between runs.
+ *
+ * Returns a string like "€1.60 /1k". When a run recorded no tokens the rate is
+ * undefined and the answer is an em dash, because dividing nothing by nothing
+ * gives a number that would only mislead.
+ */
+export function formatCostPerThousand(tokensIn: number, tokensOut: number, costMinor: number, currency: Currency): string {
+	const total = tokensIn + tokensOut
+	if (total === 0) return '—'
+	const rate = (costMinor / total) * 1000
+	const symbol = currency === 'EUR' ? '€' : '$'
+	return `${symbol}${rate.toFixed(2)} /1k`
 }
 
 export type { Budget, Run, Stage, StageName }
