@@ -43,6 +43,29 @@ and the factory runs only the ones a change reaches.
 (cd apps/console && bun test)
 ```
 
+## Contributing
+
+This repository is a software factory target. Most changes are written by automated agents, and
+every pull request is reviewed by a person before it merges.
+
+To propose a change:
+
+1. **Fork the repository** and create a feature branch.
+2. **Set up** — `bun install` from the repository root.
+3. **Check what you may change.** The [`.factory/README.md`](.factory/README.md) and
+   [`.factory/targets.json`](.factory/targets.json) declare which paths an agent may change
+   unattended, and which require a person. Human contributors can change anything, but the target
+   map is a useful guide to what each part of the repository does.
+4. **Make focused changes.** Keep each pull request to one area — the contract, one service, or the
+   console. A change that reaches several areas must update each side of the shared schema (see
+   [AGENTS.md](AGENTS.md) for the pinned-schema rule).
+5. **Run the checks** for every area your change touches, using the commands listed in the
+   [Checks](#checks) section above. The factory only runs tests for the paths a change reaches, so
+   running the full suite yourself is unnecessary.
+6. **Open a pull request** against the `main` branch. A human will review it before it merges.
+
+See [AGENTS.md](AGENTS.md) for the full rules automated agents follow when working here.
+
 ## License
 
 [MIT](LICENSE)
