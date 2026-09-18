@@ -21,6 +21,7 @@ type Run struct {
 	EndedAt   string `json:"endedAt"`
 	TokensIn  int    `json:"tokensIn"`
 	TokensOut int    `json:"tokensOut"`
+	ToolCalls int    `json:"toolCalls"`
 	CostMinor int    `json:"costMinor"`
 	Currency  string `json:"currency"`
 }
@@ -85,7 +86,7 @@ func (s *Store) PutRun(r Run) error {
 	if err := window(r.StartedAt, r.EndedAt); err != nil {
 		return err
 	}
-	if r.TokensIn < 0 || r.TokensOut < 0 || r.CostMinor < 0 {
+	if r.TokensIn < 0 || r.TokensOut < 0 || r.ToolCalls < 0 || r.CostMinor < 0 {
 		return ErrNegativeCount
 	}
 	if _, seen := s.runs[r.ID]; !seen {
@@ -95,7 +96,8 @@ func (s *Store) PutRun(r Run) error {
 	return nil
 }
 
-// AddStage appends a stage to a run that already exists.
+// AddStage appends a stage to a run that already exists, and adds its tool
+// calls to the run's aggregate total.
 func (s *Store) AddStage(st Stage) error {
 	if _, ok := s.runs[st.RunID]; !ok {
 		return ErrUnknownRun
@@ -110,6 +112,9 @@ func (s *Store) AddStage(st Stage) error {
 		return ErrNegativeCount
 	}
 	s.stages[st.RunID] = append(s.stages[st.RunID], st)
+	r := s.runs[st.RunID]
+	r.ToolCalls += st.ToolCalls
+	s.runs[st.RunID] = r
 	return nil
 }
 
