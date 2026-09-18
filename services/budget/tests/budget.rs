@@ -13,9 +13,9 @@ fn spent_plus_remaining_always_equals_the_limit() {
 }
 
 #[test]
-fn the_warning_starts_exactly_at_eighty_percent() {
-    assert_eq!(state_for(39_999, 50_000), State::Under);
-    assert_eq!(state_for(40_000, 50_000), State::Warning);
+fn the_warning_starts_exactly_at_seventy_percent() {
+    assert_eq!(state_for(34_999, 50_000), State::Under);
+    assert_eq!(state_for(35_000, 50_000), State::Warning);
     assert_eq!(state_for(49_999, 50_000), State::Warning);
 }
 
@@ -27,9 +27,9 @@ fn reaching_the_limit_is_a_breach_not_a_warning() {
 
 #[test]
 fn the_threshold_holds_on_a_limit_that_does_not_divide_evenly() {
-    // 80% of 333 is 266.4. Spending 266 is still under, 267 is a warning.
-    assert_eq!(state_for(266, 333), State::Under);
-    assert_eq!(state_for(267, 333), State::Warning);
+    // 70% of 333 is 233.1. Spending 233 is still under, 234 is a warning.
+    assert_eq!(state_for(233, 333), State::Under);
+    assert_eq!(state_for(234, 333), State::Warning);
 }
 
 #[test]
