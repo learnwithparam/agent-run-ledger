@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // Handler serves the ledger. Every error carries a machine-readable code beside
@@ -17,7 +18,26 @@ func Handler(s *Store) http.Handler {
 	})
 
 	mux.HandleFunc("GET /runs", func(w http.ResponseWriter, r *http.Request) {
-		runs := s.Runs()
+		// Date range filter params (RFC 3339).
+		var after, before *time.Time
+		if raw := r.URL.Query().Get("startedAfter"); raw != "" {
+			parsed, err := time.Parse(time.RFC3339, raw)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "bad_instant", "startedAfter must be RFC 3339.")
+				return
+			}
+			after = &parsed
+		}
+		if raw := r.URL.Query().Get("startedBefore"); raw != "" {
+			parsed, err := time.Parse(time.RFC3339, raw)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "bad_instant", "startedBefore must be RFC 3339.")
+				return
+			}
+			before = &parsed
+		}
+
+		runs := s.Runs(after, before)
 		// Bounded by default. A list that grows without a limit is a list that
 		// eventually takes the page down, and the default is where that is decided.
 		limit := 50

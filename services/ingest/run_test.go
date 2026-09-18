@@ -3,6 +3,7 @@ package ingest
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func aRun() Run {
@@ -24,7 +25,7 @@ func TestRecordingTheSameRunTwiceKeepsOneEntry(t *testing.T) {
 	if err := s.PutRun(updated); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(s.Runs()); got != 1 {
+	if got := len(s.Runs(nil, nil)); got != 1 {
 		t.Fatalf("want 1 run, got %d", got)
 	}
 	if r, _ := s.Run("run-1"); r.CostMinor != 4 {
@@ -33,7 +34,7 @@ func TestRecordingTheSameRunTwiceKeepsOneEntry(t *testing.T) {
 }
 
 func TestRunsAreListedNewestFirst(t *testing.T) {
-	runs := Seed().Runs()
+	runs := Seed().Runs(nil, nil)
 	for i := 1; i < len(runs); i++ {
 		if runs[i-1].StartedAt < runs[i].StartedAt {
 			t.Fatalf("out of order at %d: %s before %s", i, runs[i-1].StartedAt, runs[i].StartedAt)
@@ -102,10 +103,70 @@ func TestStagesComeBackInLoopOrderNotArrivalOrder(t *testing.T) {
 
 func TestTheSeedCarriesARefusal(t *testing.T) {
 	// A lab whose sample data only shows success teaches the wrong lesson.
-	for _, r := range Seed().Runs() {
+	for _, r := range Seed().Runs(nil, nil) {
 		if r.Outcome == "refused" {
 			return
 		}
 	}
 	t.Fatal("no refused run in the seed")
+}
+
+func parseTime(t *testing.T, s string) time.Time {
+	t.Helper()
+	parsed, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return parsed
+}
+
+func TestFilterAfterReturnsNewerRuns(t *testing.T) {
+	after := parseTime(t, "2026-09-16T00:00:00Z")
+	runs := Seed().Runs(&after, nil)
+	for _, r := range runs {
+		started, err := time.Parse(time.RFC3339, r.StartedAt)
+		if err != nil {
+			t.Fatalf("unparseable StartedAt on run %s: %v", r.ID, err)
+		}
+		if !started.After(after) {
+			t.Fatalf("run %s started at %s, not after filter bound", r.ID, r.StartedAt)
+		}
+	}
+	if len(runs) != 1 {
+		t.Fatalf("want 1 run after Sep 16, got %d", len(runs))
+	}
+}
+
+func TestFilterBeforeReturnsOlderRuns(t *testing.T) {
+	before := parseTime(t, "2026-09-16T00:00:00Z")
+	runs := Seed().Runs(nil, &before)
+	for _, r := range runs {
+		started, err := time.Parse(time.RFC3339, r.StartedAt)
+		if err != nil {
+			t.Fatalf("unparseable StartedAt on run %s: %v", r.ID, err)
+		}
+		if !started.Before(before) {
+			t.Fatalf("run %s started at %s, not before filter bound", r.ID, r.StartedAt)
+		}
+	}
+	if len(runs) != 4 {
+		t.Fatalf("want 4 runs before Sep 16, got %d", len(runs))
+	}
+}
+
+func TestFilterBothBoundsReturnsIntersection(t *testing.T) {
+	after := parseTime(t, "2026-09-15T10:00:00Z")
+	before := parseTime(t, "2026-09-15T12:00:00Z")
+	runs := Seed().Runs(&after, &before)
+	if len(runs) != 2 {
+		t.Fatalf("want 2 runs in the window, got %d", len(runs))
+	}
+}
+
+func TestFilterReturnsEmptyWhenNothingMatches(t *testing.T) {
+	after := parseTime(t, "2026-10-01T00:00:00Z")
+	runs := Seed().Runs(&after, nil)
+	if len(runs) != 0 {
+		t.Fatalf("want 0 runs, got %d", len(runs))
+	}
 }
