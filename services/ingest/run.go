@@ -113,13 +113,31 @@ func (s *Store) AddStage(st Stage) error {
 	return nil
 }
 
-// Runs lists every run, most recently started first.
-func (s *Store) Runs() []Run {
+// Runs lists every run, most recently started first, optionally filtered by
+// a time range. A nil after or before pointer means the bound is open.
+func (s *Store) Runs(after, before *time.Time) []Run {
 	out := make([]Run, 0, len(s.order))
 	for _, id := range s.order {
 		out = append(out, s.runs[id])
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].StartedAt > out[j].StartedAt })
+	if after != nil || before != nil {
+		filtered := make([]Run, 0, len(out))
+		for _, r := range out {
+			started, err := time.Parse(time.RFC3339, r.StartedAt)
+			if err != nil {
+				continue
+			}
+			if after != nil && !started.After(*after) {
+				continue
+			}
+			if before != nil && !started.Before(*before) {
+				continue
+			}
+			filtered = append(filtered, r)
+		}
+		out = filtered
+	}
 	return out
 }
 

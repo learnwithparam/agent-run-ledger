@@ -12,10 +12,21 @@ export const dynamic = 'force-dynamic'
 /** What a month of agent work is allowed to cost, in minor units. */
 const MONTHLY_LIMIT_MINOR = 50_000
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ afterDate?: string; beforeDate?: string }>
+}) {
+	const params = await searchParams
+
+	// Build RFC 3339 timestamps from date-only inputs. A date-only input produces
+	// YYYY-MM-DD in the user's local time, so we expand it to cover the whole UTC day.
+	const startedAfter = params.afterDate ? `${params.afterDate}T00:00:00Z` : ''
+	const startedBefore = params.beforeDate ? `${params.beforeDate}T23:59:59Z` : ''
+
 	let runs
 	try {
-		runs = await listRuns()
+		runs = await listRuns(50, startedAfter || undefined, startedBefore || undefined)
 	} catch (error) {
 		return (
 			<Shell>
@@ -87,6 +98,20 @@ export default async function Page() {
 						Newest first. Every figure here was computed by the service that owns it: the ledger for
 						runs and stages, the budget engine for anything denominated in money.
 					</p>
+					<form method="GET" className="date-range">
+						<label>
+							From
+							<input type="date" name="afterDate" defaultValue={params.afterDate ?? ''} />
+						</label>
+						<label>
+							To
+							<input type="date" name="beforeDate" defaultValue={params.beforeDate ?? ''} />
+						</label>
+						<button type="submit">Filter</button>
+						{(params.afterDate || params.beforeDate) && (
+							<a href="/">Clear</a>
+						)}
+					</form>
 					<table>
 						<thead>
 							<tr>

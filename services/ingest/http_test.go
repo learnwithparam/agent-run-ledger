@@ -96,6 +96,38 @@ func TestHealthz(t *testing.T) {
 	}
 }
 
+func TestFilterReturnsOnlyMatchingRuns(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?startedAfter=2026-09-16T00:00:00Z", "")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", rec.Code)
+	}
+	var runs []Run
+	json.Unmarshal(rec.Body.Bytes(), &runs)
+	if len(runs) != 1 {
+		t.Fatalf("want 1 run after Sep 16, got %d", len(runs))
+	}
+}
+
+func TestBadStartedAfterIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?startedAfter=not-a-timestamp", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_instant" {
+		t.Fatalf("want bad_instant code, got %s", rec.Body.String())
+	}
+}
+
+func TestBadStartedBeforeIsRefused(t *testing.T) {
+	rec := call(t, Seed(), http.MethodGet, "/runs?startedBefore=also-invalid", "")
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	if code(t, rec.Body.Bytes()) != "bad_instant" {
+		t.Fatalf("want bad_instant code, got %s", rec.Body.String())
+	}
+}
+
 func code(t *testing.T, body []byte) string {
 	t.Helper()
 	var out map[string]string
